@@ -15,8 +15,11 @@ services:
     ports:
       - "3000:3000/udp"
       - "3400:3400/udp"
-    mem_limit: 6g
-    cpus: 2
+    deploy:
+      resources:
+        limits:
+          memory: 6g
+          cpus: "2"
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://127.0.0.1:8080/cryptarchia/info || exit 1"]
       interval: 60s
