@@ -1,0 +1,112 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "DAppNode DMS Prometheus datasource",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 1,
+  "schemaVersion": 39,
+  "tags": ["logos", "blockchain", "node"],
+  "time": { "from": "now-6h", "to": "now" },
+  "title": "Logos Node",
+  "uid": "logos-node",
+  "templating": { "list": [] },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Node up / online",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "datasource": "${DS_PROMETHEUS}",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+          ],
+          "thresholds": { "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] }
+        }
+      },
+      "targets": [ { "expr": "logos_node_online", "legendFormat": "online", "datasource": "${DS_PROMETHEUS}" } ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Mining",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "datasource": "${DS_PROMETHEUS}",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "OFF", "color": "red" }, "1": { "text": "ON", "color": "green" } } }
+          ]
+        }
+      },
+      "targets": [ { "expr": "logos_node_mining", "legendFormat": "mining", "datasource": "${DS_PROMETHEUS}" } ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Connected peers",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [ { "expr": "logos_node_connected_peers", "legendFormat": "peers", "datasource": "${DS_PROMETHEUS}" } ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Aged notes (stake)",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [ { "expr": "logos_node_aged_notes_count", "legendFormat": "aged notes", "datasource": "${DS_PROMETHEUS}" } ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Chain height",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [
+        { "expr": "logos_node_height", "legendFormat": "height", "datasource": "${DS_PROMETHEUS}" },
+        { "expr": "logos_node_lib_slot", "legendFormat": "lib slot", "datasource": "${DS_PROMETHEUS}" }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Connected peers over time",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [ { "expr": "logos_node_connected_peers", "legendFormat": "peers", "datasource": "${DS_PROMETHEUS}" } ]
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Leadership: aged stake & vouchers",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [
+        { "expr": "logos_node_aged_notes_total_value", "legendFormat": "aged stake value", "datasource": "${DS_PROMETHEUS}" },
+        { "expr": "logos_node_vouchers_count", "legendFormat": "vouchers", "datasource": "${DS_PROMETHEUS}" },
+        { "expr": "logos_node_vouchers_total_claimable", "legendFormat": "claimable", "datasource": "${DS_PROMETHEUS}" }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Mempool pending items & scrape duration",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [
+        { "expr": "logos_node_mempool_pending_items", "legendFormat": "pending items", "datasource": "${DS_PROMETHEUS}" },
+        { "expr": "logos_node_scrape_duration_seconds", "legendFormat": "scrape seconds", "datasource": "${DS_PROMETHEUS}" }
+      ]
+    }
+  ]
+}
