@@ -1,0 +1,48 @@
+# Watch the upstream node release and open a version-bump PR automatically.
+#
+# `dappnodesdk github-action bump-upstream` reads manifest.upstream[]
+# (repo=logos-blockchain/logos-blockchain, arg=NODE_VERSION), fetches the
+# latest GitHub release of that repo, and if it is newer than the pinned
+# version it opens a PR that:
+#   - updates manifest.upstream[].version + upstreamVersion, and
+#   - rewrites the NODE_VERSION build arg in docker-compose.yml.
+# The build.yml workflow then validates that PR.
+#
+# Secrets / tokens:
+#   - GITHUB_TOKEN  — provided automatically by Actions; needs contents:write
+#                     and pull-requests:write (granted via `permissions` below)
+#                     so the action can push the branch and open the PR.
+#   - eth provider  — uses the public "remote" provider (no key); the APM
+#                     next-version lookup is best-effort and only fully resolves
+#                     once logos-node.public.dappnode.eth is registered on APM.
+#   --skip_build    — we only open the bump PR here; build.yml builds it. Drop
+#                     this flag (and add an IPFS provider + Pinata/IPFS secrets)
+#                     if you later want the workflow to also publish a release.
+name: Bump upstream
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # daily 06:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump-upstream:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install DAppNode SDK
+        run: npm i -g @dappnode/dappnodesdk
+
+      - name: Check upstream + open bump PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: dappnodesdk github-action bump-upstream --skip_build

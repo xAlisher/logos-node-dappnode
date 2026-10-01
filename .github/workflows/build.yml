@@ -1,0 +1,41 @@
+# Validate + build the DAppNode package on every PR and push to master.
+#
+# This does NOT publish (no IPFS upload, no APM/ENS release) — it only proves
+# the manifest, docker-compose, setup-wizard and both Dockerfiles are valid and
+# that the images build. Publishing to IPFS/APM needs an IPFS provider + a
+# mainnet signing wallet (see README "Build / publish") and is done manually
+# until the package is registered. No repository secrets are required for this
+# workflow — `dappnodesdk build --skip_upload` runs entirely offline of IPFS.
+name: Build (validate)
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # buildx enables the multi-arch (amd64 + arm64) image builds the
+      # Dockerfile is already parametric for (ARG TARGETARCH -> x86_64/aarch64).
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # emulation so arm64 layers can build on an amd64 runner
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Install DAppNode SDK
+        run: npm i -g @dappnode/dappnodesdk
+
+      # Validates manifest + compose + setup-wizard against the DAppNode schemas
+      # and builds the images. --skip_upload => no IPFS/secret needed.
+      - name: Build + validate package
+        run: dappnodesdk build --skip_upload
