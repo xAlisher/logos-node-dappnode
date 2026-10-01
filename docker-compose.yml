@@ -1,3 +1,6 @@
+# NOTE: keep this top-level `version` — the DAppNode SDK's validateComposeVersion
+# requires it (docker-compose itself calls it obsolete, but the SDK does not).
+version: "3.5"
 services:
   node:
     build:
