@@ -1,0 +1,38 @@
+version: "2"
+fields:
+  - id: miningEnabled
+    target:
+      type: environment
+      name: MINING_ENABLED
+    title: Enable mining
+    description: >-
+      Run PoW mining so the node self-funds (needed to win proposal slots on
+      testnet). Leave on unless you only want a syncing/observing node.
+    required: false
+    enum:
+      - "true"
+      - "false"
+  - id: miningMaxThreads
+    target:
+      type: environment
+      name: MINING_MAX_THREADS
+    title: Mining CPU threads
+    description: >-
+      Max CPU threads used for mining. Kept low on purpose so the node never
+      pegs the host. Default 1 — raise only on a dedicated box.
+    required: false
+    pattern: "^[1-9][0-9]*$"
+    patternErrorMessage: Must be a positive integer (1 or more).
+  - id: logLevel
+    target:
+      type: environment
+      name: LOG_LEVEL
+    title: Log level
+    description: Node log verbosity (RUST_LOG). Use debug only when troubleshooting.
+    required: false
+    enum:
+      - error
+      - warn
+      - info
+      - debug
+      - trace

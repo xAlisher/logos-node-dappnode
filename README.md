@@ -19,12 +19,29 @@ On first run the container:
 Ports: `udp/3000` (swarm) and `udp/3400` (Blend). Testnet is ephemeral — it
 re-genesises on each node release.
 
+### Setup wizard
+
+Install-time options (`setup-wizard.yml` → container env, honored every start):
+- **Enable mining** (`MINING_ENABLED`, default `true`) — turn off for a pure syncing/observing node.
+- **Mining CPU threads** (`MINING_MAX_THREADS`, default `1`) — raise only on a dedicated box.
+- **Log level** (`LOG_LEVEL`, default `info`) → `RUST_LOG`.
+
+### Resilience
+
+- `restart: unless-stopped` + a **healthcheck** (`cryptarchia/info`, 10-min start grace).
+- Resource caps: `mem_limit: 6g`, `cpus: 2`.
+- **Backup** targets the keystore + config (`/data/keystore.yaml`, `/data/user_config.yaml`),
+  **not** the chain DB — testnet state is disposable and re-syncs from IBD peers.
+
 ## Install
 
 - **Published build:** DAppStore → *Install from URL* → paste the release
   `/ipfs/Qm…` hash (or, once registered, find it in the **Public** DAppStore).
 - The Dockerfile downloads the pinned node binary at build time
-  (`ARG NODE_VERSION`), multi-arch via buildx (`amd64` / `arm64`).
+  (`ARG NODE_VERSION`, `ARG TARGETARCH`). **Published arch: `linux/amd64` only.**
+  The Dockerfile already resolves `arm64 → aarch64` (the release has that asset),
+  but a multi-arch publish needs `docker buildx`, which isn't on the current build
+  host — tracked as a CI follow-up (see Roadmap).
 
 ## Build / publish
 
@@ -36,15 +53,26 @@ dappnodesdk publish <patch|minor|major>         # -> APM/ENS release (mainnet tx
 
 ## Roadmap
 
-Tracked in `logos-co/ecosystem#247`. Toward a polished, publicly-listed package:
-setup wizard, Grafana dashboard + Prometheus targets, own web UI, backups,
-healthchecks + resource caps, multi-arch, CI (`bump-upstream`), and — for the
-official curated store — a Logos-controlled signing wallet whitelisted by DAppNode.
+Tracked in `logos-co/ecosystem#247`. Done here: setup wizard, healthcheck +
+resource caps, backups. Remaining toward a polished, publicly-listed package:
+
+- **Multi-arch (`arm64`)** — needs `docker buildx` in CI; the Dockerfile is
+  already arch-parametric.
+- **Grafana dashboard + Prometheus targets** — blocked on the node exposing
+  Prometheus metrics. `GET /mantle/metrics` currently returns **JSON**
+  (e.g. `{"pending_items":…}`), not the Prometheus text format, so a dashboard
+  needs a small exporter shim (JSON → `/metrics`) or a node-side `/metrics`
+  endpoint. Not fabricated here.
+- **Own web UI** + `links.ui` wiring.
+- **CI** (`dappnodesdk github-action bump-upstream`) to auto-bump on node releases.
+- **Official curated store** — a Logos-controlled signing wallet whitelisted by
+  DAppNode (out of our hands; this package stays on `public.dappnode.eth`).
 
 ## Layout
 
-- `Dockerfile` — downloads + installs the node binary (pinned, multi-arch)
-- `entrypoint.sh` — first-run config, mining cap, API expose, auto mining/claim
-- `dappnode_package.json` — DAppNode manifest
-- `docker-compose.yml` — service / ports / volume
+- `Dockerfile` — downloads + installs the node binary (pinned, arch-parametric)
+- `entrypoint.sh` — first-run config, mining cap, API expose, auto mining/claim, env-wired
+- `dappnode_package.json` — DAppNode manifest (+ `backup[]`)
+- `setup-wizard.yml` — install-time options (mining on/off, threads, log level)
+- `docker-compose.yml` — service / ports / volume / healthcheck / resource caps
 - `avatar.png` — DAppStore icon
