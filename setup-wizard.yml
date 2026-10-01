@@ -1,3 +1,7 @@
+# NOTE: DAppNode's setup-wizard schema has no boolean/checkbox/toggle field type
+# (only `enum` -> select menu, `pattern` -> text, `secret` -> masked text). A
+# two-option `enum` ["true","false"] rendered as a dropdown is the canonical
+# DAppNode idiom for an on/off setting. See repo issue #1.
 version: "2"
 fields:
   - id: miningEnabled

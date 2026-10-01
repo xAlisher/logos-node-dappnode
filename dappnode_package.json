@@ -1,8 +1,15 @@
 {
   "name": "logos-node.public.dappnode.eth",
-  "version": "0.1.2",
+  "version": "0.1.3",
+  "upstream": [
+    {
+      "repo": "logos-blockchain/logos-blockchain",
+      "version": "0.3.0",
+      "arg": "NODE_VERSION"
+    }
+  ],
   "shortDescription": "Community-maintained Logos testnet node (unofficial)",
-  "description": "**Community-maintained, UNOFFICIAL** Logos blockchain node — not an official Logos release. Headless Logos 0.3.0 testnet node: generates a fresh config + keys on first run (IBD peers filled), persists chain state to a volume, and runs PoW mining capped to 1 thread with auto-claim. Mining threads, mining on/off, and log level are configurable in the setup wizard. Testnet is ephemeral (re-genesises each release). For the official package, watch for a signed release in the curated DAppStore.",
+  "description": "**Community-maintained, UNOFFICIAL** Logos blockchain node — not an official Logos release. Headless Logos 0.3.0 testnet node: generates a fresh config + keys on first run (IBD peers filled), persists chain state to a volume, and runs PoW mining capped to 1 thread with auto-claim. Mining threads, mining on/off, and log level are configurable in the setup wizard. A bundled Prometheus exporter feeds the DAppNode monitoring stack (DMS) a ready-made Grafana dashboard. Testnet is ephemeral (re-genesises each release). For the official package, watch for a signed release in the curated DAppStore.",
   "type": "service",
   "architectures": ["linux/amd64"],
   "author": "xAlisher",
@@ -12,6 +19,24 @@
     "homepage": "https://logos.co/",
     "gitRepo": "https://github.com/logos-co"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xAlisher/logos-node-dappnode.git"
+  },
+  "prometheusTargets": [
+    {
+      "targets": ["monitoring.logos-node.public.dappnode.eth:9112"],
+      "labels": {
+        "job": "logos-node",
+        "group": "logos"
+      }
+    }
+  ],
+  "grafanaDashboards": [
+    {
+      "uid": "logos-node"
+    }
+  ],
   "backup": [
     {
       "name": "keystore",

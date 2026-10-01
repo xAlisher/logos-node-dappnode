@@ -29,9 +29,22 @@ Install-time options (`setup-wizard.yml` → container env, honored every start)
 ### Resilience
 
 - `restart: unless-stopped` + a **healthcheck** (`cryptarchia/info`, 10-min start grace).
-- Resource caps: `mem_limit: 6g`, `cpus: 2`.
+- Resource caps: `mem_limit: 6g`, `cpus: 2` (under `deploy.resources.limits`).
 - **Backup** targets the keystore + config (`/data/keystore.yaml`, `/data/user_config.yaml`),
   **not** the chain DB — testnet state is disposable and re-syncs from IBD peers.
+
+### Monitoring (Grafana + Prometheus)
+
+A second service, **`monitoring/`**, runs a tiny stdlib-only Prometheus exporter
+(`monitoring/exporter.py`) that polls the node HTTP API each scrape and renders
+the Prometheus text format on `:9112/metrics` — the node itself only speaks JSON
+(`GET /mantle/metrics` returns JSON, not Prometheus), so DMS can't scrape it
+directly. DAppNode's DMS picks up `prometheus-targets.json` and
+`logos-node-grafana-dashboard.json` automatically. Metrics: `logos_node_up`,
+`_online`, `_height`, `_lib_slot`, `_connected_peers`, `_mining`,
+`_rewards_enabled`, `_auto_claim_armed`, `_aged_notes_count`/`_total_value`,
+`_vouchers_count`/`_total_claimable`, `_reward_amount`, `_mempool_pending_items`,
+`_scrape_duration_seconds`.
 
 ## Install
 
@@ -51,22 +64,45 @@ dappnodesdk build   --provider <ipfs-api-url>   # -> install hash
 dappnodesdk publish <patch|minor|major>         # -> APM/ENS release (mainnet tx)
 ```
 
+## CI
+
+- **`.github/workflows/build.yml`** — on every PR/push, installs the SDK, sets
+  up buildx + QEMU, and runs `dappnodesdk build --skip_upload` to validate the
+  manifest/compose/setup-wizard against the DAppNode schemas and build both
+  images. **No secrets required.**
+- **`.github/workflows/bump-upstream.yml`** — daily (+ manual) check of
+  `logos-blockchain/logos-blockchain` releases via `dappnodesdk github-action
+  bump-upstream`; opens a PR that bumps `manifest.upstream[].version` and the
+  `NODE_VERSION` compose build arg when a newer node release lands. Uses the
+  auto-provided `GITHUB_TOKEN` (contents + PR write). The APM next-version
+  lookup only fully resolves once the package is registered on APM.
+
 ## Roadmap
 
-Tracked in `logos-co/ecosystem#247`. Done here: setup wizard, healthcheck +
-resource caps, backups. Remaining toward a polished, publicly-listed package:
+Tracked in `logos-co/ecosystem#247`. **Done here:** setup wizard, healthcheck +
+resource caps, backups, **Prometheus exporter + Grafana dashboard + DMS
+targets**, **CI (build-validate + bump-upstream)**, Dockerfile arch-parametric
+for arm64. Remaining toward a polished, publicly-listed package:
 
-- **Multi-arch (`arm64`)** — needs `docker buildx` in CI; the Dockerfile is
-  already arch-parametric.
-- **Grafana dashboard + Prometheus targets** — blocked on the node exposing
-  Prometheus metrics. `GET /mantle/metrics` currently returns **JSON**
-  (e.g. `{"pending_items":…}`), not the Prometheus text format, so a dashboard
-  needs a small exporter shim (JSON → `/metrics`) or a node-side `/metrics`
-  endpoint. Not fabricated here.
+- **Multi-arch (`arm64`) publish** — the Dockerfile + CI buildx are ready; the
+  published release is `linux/amd64` only until a multi-arch publish runs in CI
+  (needs an IPFS/pinning provider — see below).
+- **IPFS publish in CI** — `build.yml` validates but does not upload. A
+  publishing workflow needs an IPFS provider / pinning secret (e.g. a
+  self-hosted IPFS node or Infura IPFS creds) added as repo secrets.
 - **Own web UI** + `links.ui` wiring.
-- **CI** (`dappnodesdk github-action bump-upstream`) to auto-bump on node releases.
-- **Official curated store** — a Logos-controlled signing wallet whitelisted by
-  DAppNode (out of our hands; this package stays on `public.dappnode.eth`).
+- **ENS/APM registration + official curated store** — registering
+  `logos-node.public.dappnode.eth` needs a funded wallet (mainnet tx); the
+  official signed store needs a Logos-controlled wallet whitelisted by DAppNode
+  (out of our hands; this package stays on `public.dappnode.eth`).
+
+### Setup wizard: why "Enable mining" is a dropdown, not a checkbox (issue #1)
+
+DAppNode's setup-wizard schema has **no boolean/checkbox/toggle field type** —
+only `enum` (→ select menu), `pattern` (→ text) and `secret` (→ masked text).
+A two-option `enum` `["true","false"]` rendered as a dropdown is the canonical
+DAppNode idiom for an on/off setting. Not a bug we can fix package-side; a native
+toggle would be an upstream DAppNode feature request.
 
 ## Layout
 
@@ -74,5 +110,8 @@ resource caps, backups. Remaining toward a polished, publicly-listed package:
 - `entrypoint.sh` — first-run config, mining cap, API expose, auto mining/claim, env-wired
 - `dappnode_package.json` — DAppNode manifest (+ `backup[]`)
 - `setup-wizard.yml` — install-time options (mining on/off, threads, log level)
-- `docker-compose.yml` — service / ports / volume / healthcheck / resource caps
+- `docker-compose.yml` — node + monitoring services / ports / volume / healthcheck / caps
+- `monitoring/` — `exporter.py` (JSON→Prometheus shim) + its `Dockerfile`
+- `prometheus-targets.json` / `logos-node-grafana-dashboard.json` — DMS wiring
+- `.github/workflows/` — build-validate + bump-upstream CI
 - `avatar.png` — DAppStore icon
