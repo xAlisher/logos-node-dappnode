@@ -1,0 +1,8 @@
+# build artifacts / large binaries — the Dockerfile downloads the node at build time
+build_*/
+binroot/
+*.tar.gz
+logos-blockchain-node
+releases.json
+*.log
+publish-when-ipfs-up.sh

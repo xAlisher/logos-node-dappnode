@@ -1,0 +1,15 @@
+version: "3.5"
+services:
+  node:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: "node.logos-node.public.dappnode.eth:0.1.0"
+    restart: unless-stopped
+    volumes:
+      - "data:/data"
+    ports:
+      - "3000:3000/udp"
+      - "3400:3400/udp"
+volumes:
+  data: {}
