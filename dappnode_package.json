@@ -1,6 +1,6 @@
 {
   "name": "logos-blockchain-node.public.dappnode.eth",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "upstream": [
     {
       "repo": "logos-blockchain/logos-blockchain",
