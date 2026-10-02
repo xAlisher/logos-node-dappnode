@@ -6,7 +6,7 @@
 # /api to the node service on the package's internal docker network (node:8080).
 
 FROM node:22-alpine AS build
-ARG WEBUI_REF=688a0a22c91e51d3a623ea361f24bfa0433b0820
+ARG WEBUI_REF=f27880bf45a0cf8a911dd6c959a89df13f322aec
 RUN apk add --no-cache git
 WORKDIR /app
 RUN git clone https://github.com/xAlisher/logos-node-webui.git . \
