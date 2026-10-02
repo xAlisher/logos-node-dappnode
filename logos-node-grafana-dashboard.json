@@ -125,7 +125,31 @@
           "legendFormat": "peers",
           "datasource": "Prometheus"
         }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1
+              },
+              {
+                "color": "green",
+                "value": 5
+              }
+            ]
+          }
+        }
+      }
     },
     {
       "id": 4,
@@ -237,97 +261,14 @@
     },
     {
       "type": "graph",
-      "title": "Connected peers over time",
-      "id": 6,
-      "datasource": "Prometheus",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 4
-      },
-      "targets": [
-        {
-          "expr": "logos_node_connected_peers",
-          "legendFormat": "peers",
-          "refId": "A",
-          "datasource": "Prometheus"
-        }
-      ],
-      "lines": true,
-      "linewidth": 1,
-      "fill": 1,
-      "fillGradient": 0,
-      "points": false,
-      "pointradius": 2,
-      "bars": false,
-      "stack": false,
-      "percentage": false,
-      "steppedLine": false,
-      "hiddenSeries": false,
-      "dashes": false,
-      "dashLength": 10,
-      "spaceLength": 10,
-      "nullPointMode": "null",
-      "renderer": "flot",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "buckets": null,
-        "name": null,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      },
-      "legend": {
-        "show": true,
-        "values": false,
-        "min": false,
-        "max": false,
-        "current": false,
-        "total": false,
-        "avg": false
-      },
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "aliasColors": {},
-      "seriesOverrides": [],
-      "thresholds": [],
-      "timeRegions": []
-    },
-    {
-      "type": "graph",
       "title": "Leadership: aged stake & vouchers",
       "id": 7,
       "datasource": "Prometheus",
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
-        "y": 12
+        "x": 12,
+        "y": 4
       },
       "targets": [
         {
@@ -420,8 +361,8 @@
       "datasource": "Prometheus",
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 12,
+        "w": 24,
+        "x": 0,
         "y": 12
       },
       "targets": [
