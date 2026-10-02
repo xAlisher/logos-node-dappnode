@@ -15,7 +15,7 @@
   "schemaVersion": 39,
   "tags": ["logos", "blockchain", "node"],
   "time": { "from": "now-6h", "to": "now" },
-  "title": "Logos Node",
+  "title": "Logos Blockchain Node",
   "uid": "logos-node",
   "templating": { "list": [] },
   "panels": [

@@ -14,7 +14,7 @@
 #                     so the action can push the branch and open the PR.
 #   - eth provider  — uses the public "remote" provider (no key); the APM
 #                     next-version lookup is best-effort and only fully resolves
-#                     once logos-node.public.dappnode.eth is registered on APM.
+#                     once logos-blockchain-node.public.dappnode.eth is registered on APM.
 #   --skip_build    — we only open the bump PR here; build.yml builds it. Drop
 #                     this flag (and add an IPFS provider + Pinata/IPFS secrets)
 #                     if you later want the workflow to also publish a release.

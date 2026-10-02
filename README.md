@@ -1,4 +1,4 @@
-# logos-node — DAppNode package (community, unofficial)
+# logos-blockchain-node — DAppNode package (community, unofficial)
 
 A one-click [DAppNode](https://dappnode.io) package that runs a **Logos 0.3.0
 blockchain testnet node**, headless.
@@ -92,7 +92,7 @@ for arm64. Remaining toward a polished, publicly-listed package:
   self-hosted IPFS node or Infura IPFS creds) added as repo secrets.
 - **Own web UI** + `links.ui` wiring.
 - **ENS/APM registration + official curated store** — registering
-  `logos-node.public.dappnode.eth` needs a funded wallet (mainnet tx); the
+  `logos-blockchain-node.public.dappnode.eth` needs a funded wallet (mainnet tx); the
   official signed store needs a Logos-controlled wallet whitelisted by DAppNode
   (out of our hands; this package stays on `public.dappnode.eth`).
 

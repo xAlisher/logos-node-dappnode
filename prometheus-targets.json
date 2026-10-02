@@ -1,6 +1,6 @@
 [
   {
-    "targets": ["monitoring.logos-node.public.dappnode.eth:9112"],
+    "targets": ["monitoring.logos-blockchain-node.public.dappnode.eth:9112"],
     "labels": {
       "job": "logos-node",
       "group": "logos"
