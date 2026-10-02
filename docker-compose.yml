@@ -10,7 +10,7 @@ services:
       # in place when logos-blockchain/logos-blockchain cuts a new release.
       args:
         NODE_VERSION: 0.3.0
-    image: "node.logos-blockchain-node.public.dappnode.eth:0.1.11"
+    image: "node.logos-blockchain-node.public.dappnode.eth:0.1.12"
     restart: unless-stopped
     environment:
       - MINING_ENABLED=true
@@ -36,12 +36,23 @@ services:
     build:
       context: ./monitoring
       dockerfile: Dockerfile
-    image: "monitoring.logos-blockchain-node.public.dappnode.eth:0.1.11"
+    image: "monitoring.logos-blockchain-node.public.dappnode.eth:0.1.12"
     restart: unless-stopped
     environment:
       # Reach the node over the package's internal docker network by service name.
       - NODE_API=http://node:8080
       - LISTEN_PORT=9112
+    depends_on:
+      - node
+  webui:
+    build:
+      context: ./webui
+      dockerfile: Dockerfile
+    image: "webui.logos-blockchain-node.public.dappnode.eth:0.1.12"
+    restart: unless-stopped
+    environment:
+      # Reverse-proxy /api to the node over the package's internal network.
+      - NODE_UPSTREAM=node:8080
     depends_on:
       - node
 volumes:

@@ -46,6 +46,18 @@ directly. DAppNode's DMS picks up `prometheus-targets.json` and
 `_vouchers_count`/`_total_claimable`, `_reward_amount`, `_mempool_pending_items`,
 `_scrape_duration_seconds`.
 
+### Web dashboard (the UI button)
+
+A third service, **`webui/`**, serves a faithful web replica of the official
+Logos node app (`logos-blockchain/logos-blockchain-ui`) — node status, rewards,
+explorer, wallet, mining, and settings, in the real Logos design system. It is
+built from **xAlisher/logos-node-webui** (pinned by commit in `webui/Dockerfile`)
+and served by nginx, which reverse-proxies `/api` to the node on the package
+network (`node:8080`), including the two SSE streams. The package manifest wires
+`links.ui` to `http://webui.logos-blockchain-node.public.dappnode`, so the UI
+button in the DAppNode installer opens the dashboard. Feature/action parity with
+the official app is gated by a 225-entry checklist in the UI repo.
+
 ## Install
 
 - **Published build:** DAppStore → *Install from URL* → paste the release
@@ -82,7 +94,8 @@ dappnodesdk publish <patch|minor|major>         # -> APM/ENS release (mainnet tx
 Tracked in `logos-co/ecosystem#247`. **Done here:** setup wizard, healthcheck +
 resource caps, backups, **Prometheus exporter + Grafana dashboard + DMS
 targets**, **CI (build-validate + bump-upstream)**, Dockerfile arch-parametric
-for arm64. Remaining toward a polished, publicly-listed package:
+for arm64, **web dashboard (`webui/`) + `links.ui` wiring**. Remaining toward a
+polished, publicly-listed package:
 
 - **Multi-arch (`arm64`) publish** — the Dockerfile + CI buildx are ready; the
   published release is `linux/amd64` only until a multi-arch publish runs in CI
@@ -90,7 +103,6 @@ for arm64. Remaining toward a polished, publicly-listed package:
 - **IPFS publish in CI** — `build.yml` validates but does not upload. A
   publishing workflow needs an IPFS provider / pinning secret (e.g. a
   self-hosted IPFS node or Infura IPFS creds) added as repo secrets.
-- **Own web UI** + `links.ui` wiring.
 - **ENS/APM registration + official curated store** — registering
   `logos-blockchain-node.public.dappnode.eth` needs a funded wallet (mainnet tx); the
   official signed store needs a Logos-controlled wallet whitelisted by DAppNode
@@ -110,8 +122,9 @@ toggle would be an upstream DAppNode feature request.
 - `entrypoint.sh` — first-run config, mining cap, API expose, auto mining/claim, env-wired
 - `dappnode_package.json` — DAppNode manifest (+ `backup[]`)
 - `setup-wizard.yml` — install-time options (mining on/off, threads, log level)
-- `docker-compose.yml` — node + monitoring services / ports / volume / healthcheck / caps
+- `docker-compose.yml` — node + monitoring + webui services / ports / volume / healthcheck / caps
 - `monitoring/` — `exporter.py` (JSON→Prometheus shim) + its `Dockerfile`
+- `webui/` — `Dockerfile` that clones + builds the web dashboard (nginx + `/api` proxy)
 - `prometheus-targets.json` / `logos-node-grafana-dashboard.json` — DMS wiring
 - `.github/workflows/` — build-validate + bump-upstream CI
 - `avatar.png` — DAppStore icon
