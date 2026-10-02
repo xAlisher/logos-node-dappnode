@@ -1,8 +1,11 @@
 FROM debian:stable-slim
 
-# Pinned node version + target arch (buildx sets TARGETARCH for multi-arch builds).
+# Pinned node version + target arch. Declare TARGETARCH WITHOUT a default: buildx
+# auto-populates it per --platform, and a literal default (=amd64) would SHADOW that
+# auto-value, silently baking the x86_64 binary into the arm64 image. For plain
+# (non-buildx) builds where it's empty, we fall back to amd64 in the RUN below.
 ARG NODE_VERSION=0.3.0
-ARG TARGETARCH=amd64
+ARG TARGETARCH
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends ca-certificates curl \
@@ -10,7 +13,7 @@ RUN apt-get update \
 
 # Download + install the logos-blockchain-node binary for the target architecture.
 RUN set -eux; \
-    case "${TARGETARCH}" in \
+    case "${TARGETARCH:-amd64}" in \
       amd64) A=x86_64 ;; \
       arm64) A=aarch64 ;; \
       *) echo "unsupported TARGETARCH=${TARGETARCH}"; exit 1 ;; \
