@@ -1,6 +1,6 @@
 {
   "name": "logos-blockchain-node.public.dappnode.eth",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "upstream": [
     {
       "repo": "logos-blockchain/logos-blockchain",
@@ -12,6 +12,10 @@
   "description": "**Community-maintained, UNOFFICIAL** Logos blockchain node — not an official Logos release. Headless Logos 0.3.0 testnet node: generates a fresh config + keys on first run (IBD peers filled), persists chain state to a volume, and runs PoW mining capped to 1 thread with auto-claim. Mining threads, mining on/off, and log level are configurable in the setup wizard. A bundled **web dashboard** (the UI button) replicates the official Logos node app: node status, rewards, explorer, wallet, mining, and settings. A bundled Prometheus exporter feeds the DAppNode monitoring stack (DMS) a ready-made Grafana dashboard. Testnet is ephemeral (re-genesises each release). For the official package, watch for a signed release in the curated DAppStore.",
   "type": "service",
   "architectures": ["linux/amd64"],
+  "requirements": {
+    "minimumDappnodeVersion": "0.2.80"
+  },
+  "gettingStarted": "## Logos node (community, unofficial)\n\nThis runs a headless **Logos 0.3.0 testnet** node. On first start it generates a fresh config + keys, fills the IBD peers, and begins syncing. PoW mining is **on by default, capped to 1 CPU thread** (so it won't peg the host) with auto-claim.\n\n**Open the dashboard** — click **UI** to open the bundled web dashboard: node status, rewards, explorer, wallet, and mining.\n\n**Check it's working** — the dashboard's Node tab should read **Online / Following the chain**, with a rising Height and more than zero peers. A Grafana dashboard is auto-provisioned in **DMS** (`http://dms.dappnode`).\n\n**Blend** — if you run Blend, forward **UDP 3400** to this node so peers can reach it.\n\n**Config, keystore, and database** live with the container — manage them from this package's **Config**, **Backup**, and **File Manager** tabs. Back up your keystore: it is the one file that cannot be regenerated.\n\n_Testnet is ephemeral and re-genesises on releases. Unofficial and community-maintained; for the official package, watch for a signed release in the curated DAppStore._",
   "author": "xAlisher",
   "categories": ["Blockchain"],
   "keywords": ["logos", "blockchain", "node", "testnet", "community"],
