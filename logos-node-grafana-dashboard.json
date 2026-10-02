@@ -147,100 +147,360 @@
       ]
     },
     {
-      "id": 5,
-      "type": "timeseries",
+      "type": "graph",
       "title": "Chain height",
+      "id": 5,
+      "datasource": "Prometheus",
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 0,
         "y": 4
       },
-      "datasource": "Prometheus",
       "targets": [
         {
           "expr": "logos_node_height",
           "legendFormat": "height",
+          "refId": "A",
           "datasource": "Prometheus"
         },
         {
           "expr": "logos_node_lib_slot",
           "legendFormat": "lib slot",
+          "refId": "B",
           "datasource": "Prometheus"
         }
-      ]
+      ],
+      "lines": true,
+      "linewidth": 1,
+      "fill": 1,
+      "fillGradient": 0,
+      "points": false,
+      "pointradius": 2,
+      "bars": false,
+      "stack": false,
+      "percentage": false,
+      "steppedLine": false,
+      "hiddenSeries": false,
+      "dashes": false,
+      "dashLength": 10,
+      "spaceLength": 10,
+      "nullPointMode": "null",
+      "renderer": "flot",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "buckets": null,
+        "name": null,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      },
+      "legend": {
+        "show": true,
+        "values": false,
+        "min": false,
+        "max": false,
+        "current": false,
+        "total": false,
+        "avg": false
+      },
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "aliasColors": {},
+      "seriesOverrides": [],
+      "thresholds": [],
+      "timeRegions": []
     },
     {
-      "id": 6,
-      "type": "timeseries",
+      "type": "graph",
       "title": "Connected peers over time",
+      "id": 6,
+      "datasource": "Prometheus",
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 12,
         "y": 4
       },
-      "datasource": "Prometheus",
       "targets": [
         {
           "expr": "logos_node_connected_peers",
           "legendFormat": "peers",
+          "refId": "A",
           "datasource": "Prometheus"
         }
-      ]
+      ],
+      "lines": true,
+      "linewidth": 1,
+      "fill": 1,
+      "fillGradient": 0,
+      "points": false,
+      "pointradius": 2,
+      "bars": false,
+      "stack": false,
+      "percentage": false,
+      "steppedLine": false,
+      "hiddenSeries": false,
+      "dashes": false,
+      "dashLength": 10,
+      "spaceLength": 10,
+      "nullPointMode": "null",
+      "renderer": "flot",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "buckets": null,
+        "name": null,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      },
+      "legend": {
+        "show": true,
+        "values": false,
+        "min": false,
+        "max": false,
+        "current": false,
+        "total": false,
+        "avg": false
+      },
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "aliasColors": {},
+      "seriesOverrides": [],
+      "thresholds": [],
+      "timeRegions": []
     },
     {
-      "id": 7,
-      "type": "timeseries",
+      "type": "graph",
       "title": "Leadership: aged stake & vouchers",
+      "id": 7,
+      "datasource": "Prometheus",
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 0,
         "y": 12
       },
-      "datasource": "Prometheus",
       "targets": [
         {
           "expr": "logos_node_aged_notes_total_value",
           "legendFormat": "aged stake value",
+          "refId": "A",
           "datasource": "Prometheus"
         },
         {
           "expr": "logos_node_vouchers_count",
           "legendFormat": "vouchers",
+          "refId": "B",
           "datasource": "Prometheus"
         },
         {
           "expr": "logos_node_vouchers_total_claimable",
           "legendFormat": "claimable",
+          "refId": "C",
           "datasource": "Prometheus"
         }
-      ]
+      ],
+      "lines": true,
+      "linewidth": 1,
+      "fill": 1,
+      "fillGradient": 0,
+      "points": false,
+      "pointradius": 2,
+      "bars": false,
+      "stack": false,
+      "percentage": false,
+      "steppedLine": false,
+      "hiddenSeries": false,
+      "dashes": false,
+      "dashLength": 10,
+      "spaceLength": 10,
+      "nullPointMode": "null",
+      "renderer": "flot",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "buckets": null,
+        "name": null,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      },
+      "legend": {
+        "show": true,
+        "values": false,
+        "min": false,
+        "max": false,
+        "current": false,
+        "total": false,
+        "avg": false
+      },
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "aliasColors": {},
+      "seriesOverrides": [],
+      "thresholds": [],
+      "timeRegions": []
     },
     {
-      "id": 8,
-      "type": "timeseries",
+      "type": "graph",
       "title": "Mempool pending items & scrape duration",
+      "id": 8,
+      "datasource": "Prometheus",
       "gridPos": {
         "h": 8,
         "w": 12,
         "x": 12,
         "y": 12
       },
-      "datasource": "Prometheus",
       "targets": [
         {
           "expr": "logos_node_mempool_pending_items",
           "legendFormat": "pending items",
+          "refId": "A",
           "datasource": "Prometheus"
         },
         {
           "expr": "logos_node_scrape_duration_seconds",
           "legendFormat": "scrape seconds",
+          "refId": "B",
           "datasource": "Prometheus"
         }
-      ]
+      ],
+      "lines": true,
+      "linewidth": 1,
+      "fill": 1,
+      "fillGradient": 0,
+      "points": false,
+      "pointradius": 2,
+      "bars": false,
+      "stack": false,
+      "percentage": false,
+      "steppedLine": false,
+      "hiddenSeries": false,
+      "dashes": false,
+      "dashLength": 10,
+      "spaceLength": 10,
+      "nullPointMode": "null",
+      "renderer": "flot",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "buckets": null,
+        "name": null,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      },
+      "legend": {
+        "show": true,
+        "values": false,
+        "min": false,
+        "max": false,
+        "current": false,
+        "total": false,
+        "avg": false
+      },
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "aliasColors": {},
+      "seriesOverrides": [],
+      "thresholds": [],
+      "timeRegions": []
     }
   ]
 }
