@@ -60,13 +60,13 @@ the official app is gated by a 225-entry checklist in the UI repo.
 
 ## Install
 
-- **Published build:** DAppStore → *Install from URL* → paste the release
+- **GitHub release:** [v0.1.18](https://github.com/xAlisher/logos-node-dappnode/releases/tag/v0.1.18)
+  ships the built package bundles for **`linux/amd64` and `linux/arm64`**.
+- **On a DAppNode:** DAppStore → *Install from URL* → paste the release
   `/ipfs/Qm…` hash (or, once registered, find it in the **Public** DAppStore).
 - The Dockerfile downloads the pinned node binary at build time
-  (`ARG NODE_VERSION`, `ARG TARGETARCH`). **Published arch: `linux/amd64` only.**
-  The Dockerfile already resolves `arm64 → aarch64` (the release has that asset),
-  but a multi-arch publish needs `docker buildx`, which isn't on the current build
-  host — tracked as a CI follow-up (see Roadmap).
+  (`ARG NODE_VERSION`, `ARG TARGETARCH`) and builds **both** architectures via
+  `docker buildx` + QEMU (`arm64 → aarch64`); the arm64 binary is verified aarch64.
 
 ## Build / publish
 
@@ -93,13 +93,11 @@ dappnodesdk publish <patch|minor|major>         # -> APM/ENS release (mainnet tx
 
 Tracked in `logos-co/ecosystem#247`. **Done here:** setup wizard, healthcheck +
 resource caps, backups, **Prometheus exporter + Grafana dashboard + DMS
-targets**, **CI (build-validate + bump-upstream)**, Dockerfile arch-parametric
-for arm64, **web dashboard (`webui/`) + `links.ui` wiring**. Remaining toward a
+targets**, **CI (build-validate + bump-upstream)**, **real multi-arch (amd64 + arm64) build
++ GitHub release ([v0.1.18](https://github.com/xAlisher/logos-node-dappnode/releases/tag/v0.1.18))**,
+**web dashboard (`webui/`) + `links.ui` wiring**. Remaining toward a
 polished, publicly-listed package:
 
-- **Multi-arch (`arm64`) publish** — the Dockerfile + CI buildx are ready; the
-  published release is `linux/amd64` only until a multi-arch publish runs in CI
-  (needs an IPFS/pinning provider — see below).
 - **IPFS publish in CI** — `build.yml` validates but does not upload. A
   publishing workflow needs an IPFS provider / pinning secret (e.g. a
   self-hosted IPFS node or Infura IPFS creds) added as repo secrets.
