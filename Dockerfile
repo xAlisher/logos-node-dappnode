@@ -4,8 +4,10 @@ FROM debian:stable-slim
 # auto-populates it per --platform, and a literal default (=amd64) would SHADOW that
 # auto-value, silently baking the x86_64 binary into the arm64 image. For plain
 # (non-buildx) builds where it's empty, we fall back to amd64 in the RUN below.
-ARG NODE_VERSION=0.3.0
+ARG NODE_VERSION=0.3.1
 ARG TARGETARCH
+# The entrypoint compares this with the chain the volume was created on.
+ENV CHAIN_VERSION=${NODE_VERSION}
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends ca-certificates curl \

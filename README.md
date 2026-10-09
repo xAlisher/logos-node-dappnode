@@ -1,6 +1,6 @@
 # logos-blockchain-node — DAppNode package (community, unofficial)
 
-A one-click [DAppNode](https://dappnode.io) package that runs a **Logos 0.3.0
+A one-click [DAppNode](https://dappnode.io) package that runs a **Logos 0.3.1
 blockchain testnet node**, headless.
 
 > **Community-maintained, UNOFFICIAL — not an official Logos release.** For an
@@ -10,7 +10,7 @@ blockchain testnet node**, headless.
 ## What it does
 
 On first run the container:
-- generates a fresh 0.3.0 config + keys (`init-config`), with **`bootstrap.ibd.peers` filled** so it syncs cleanly;
+- generates a fresh 0.3.1 config + keys (`init-config`), with **`bootstrap.ibd.peers` filled** so it syncs cleanly;
 - **caps PoW mining to 1 thread** so it never pegs the host;
 - binds the node HTTP API to `0.0.0.0:8080` so it can be monitored;
 - persists chain state / keystore to a named volume (restart-safe);

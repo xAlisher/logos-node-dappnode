@@ -10,10 +10,28 @@ MINING_MAX_THREADS="${MINING_MAX_THREADS:-1}"
 LOG_LEVEL="${LOG_LEVEL:-info}"
 export RUST_LOG="${RUST_LOG:-$LOG_LEVEL}"
 
-# First run: generate a fresh 0.3.0 config + keys. init-config fills BOTH
+# New chain (relaunch / re-genesis): a volume created on another chain still holds
+# that chain's config and blocks, and the node panics replaying them
+# ("The chain can't be recovered from storage ... FutureBlock"). Move them aside,
+# keys included, and start fresh. Volumes from before this marker existed are 0.3.0.
+MARK="$DATA/.chain-version"
+CHAIN="${CHAIN_VERSION:-unknown}"
+if [ -f "$CFG" ]; then
+  OLD="$(cat "$MARK" 2>/dev/null || echo 0.3.0)"
+  if [ "$OLD" != "$CHAIN" ]; then
+    ARCH="$DATA/oldchain-$OLD"
+    echo "[logos-node] chain changed ($OLD -> $CHAIN): moving old config, keys and chain data to $ARCH"
+    mkdir -p "$ARCH"
+    for f in user_config.yaml keystore.yaml state db; do
+      if [ -e "$DATA/$f" ]; then mv "$DATA/$f" "$ARCH/"; fi
+    done
+  fi
+fi
+
+# First run: generate a fresh config + keys. init-config fills BOTH
 # initial_peers and bootstrap.ibd.peers from the -p peers, so IBD works.
 if [ ! -f "$CFG" ]; then
-  echo "[logos-node] first run: generating fresh 0.3.0 config + keys"
+  echo "[logos-node] first run: generating fresh $CHAIN config + keys"
   logos-blockchain-node init-config -o "$CFG" -k "$KS" \
     -p /ip4/65.109.51.37/udp/3000/quic-v1/p2p/12D3KooWFrouXfmrR4nsLMtE7wu15DoMJ6VtoUtHinREZCvbWHar \
     -p /ip4/65.109.51.37/udp/3001/quic-v1/p2p/12D3KooWJRGau8M1rjT7R5e4YYsgdFhsMX35nRDtMwCDjxQkXAHz \
@@ -21,6 +39,7 @@ if [ ! -f "$CFG" ]; then
     -p /ip4/65.109.51.37/udp/50001/quic-v1/p2p/12D3KooWSQc7CcGtvWDPF1yCbBthFnQjprfCVHmfmNDUrSmqQsU1
   echo "[logos-node] config generated"
 fi
+echo "$CHAIN" > "$MARK"
 
 # Apply wizard settings every start (idempotent) so updates take effect:
 #  - cap mining threads to the configured value (default 1, host-friendly)
