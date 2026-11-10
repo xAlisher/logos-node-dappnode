@@ -1,4 +1,5 @@
-# Validate + build the DAppNode package on every PR and push to master.
+# Validate + build the DAppNode package on every PR and push to master, and run
+# the entrypoint upgrade tests against the node image.
 #
 # This does NOT publish (no IPFS upload, no APM/ENS release) — it only proves
 # the manifest, docker-compose, setup-wizard and both Dockerfiles are valid and
@@ -39,3 +40,23 @@ jobs:
       # and builds the images. --skip_upload => no IPFS/secret needed.
       - name: Build + validate package
         run: dappnodesdk build --skip_upload
+
+  # Upgrade paths: the entrypoint must keep an operator's keys and chain data
+  # when a node release stays on the same chain, and only start fresh on a
+  # re-genesis. Runs the real image against seeded volumes.
+  upgrade-tests:
+    # Both package architectures natively: the genesis probe runs the node binary.
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Through compose, so the image uses the NODE_VERSION a release ships
+      # (bump-upstream edits it in docker-compose.yml, not in the Dockerfile).
+      - name: Build the node image
+        run: docker compose build node
+
+      - name: Run upgrade tests
+        run: tests/entrypoint-upgrade.sh "$(docker compose config --images | grep '^node\.')"
