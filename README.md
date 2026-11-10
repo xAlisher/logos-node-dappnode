@@ -86,8 +86,12 @@ dappnodesdk publish <patch|minor|major>         # -> APM/ENS release (mainnet tx
   `logos-blockchain/logos-blockchain` releases via `dappnodesdk github-action
   bump-upstream`; opens a PR that bumps `manifest.upstream[].version` and the
   `NODE_VERSION` compose build arg when a newer node release lands. Uses the
-  auto-provided `GITHUB_TOKEN` (contents + PR write). The APM next-version
-  lookup only fully resolves once the package is registered on APM.
+  optional `BUMP_UPSTREAM_TOKEN` secret (a fine-grained PAT for this repo, so CI
+  runs on the bump PR), else `GITHUB_TOKEN`, which needs "Allow GitHub Actions to create
+  and approve pull requests" enabled. Bump branches that never got a PR are
+  deleted so the release is retried, and the run fails when the package is
+  behind the latest stable node release with no bump PR open. The APM
+  next-version lookup only fully resolves once the package is registered on APM.
 
 ## Roadmap
 
