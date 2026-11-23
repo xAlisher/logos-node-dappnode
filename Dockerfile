@@ -6,8 +6,6 @@ FROM debian:stable-slim
 # (non-buildx) builds where it's empty, we fall back to amd64 in the RUN below.
 ARG NODE_VERSION=0.3.1
 ARG TARGETARCH
-# The entrypoint compares this with the chain the volume was created on.
-ENV CHAIN_VERSION=${NODE_VERSION}
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends ca-certificates curl \
@@ -26,8 +24,11 @@ RUN set -eux; \
     rm -rf /tmp/node.tgz; \
     logos-blockchain-node --version || true
 
+# chain-genesis.sh reads the genesis of the chain this node binary joins; the
+# entrypoint compares it with the genesis a data volume was created on.
+COPY chain-genesis.sh /usr/local/bin/chain-genesis.sh
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/chain-genesis.sh /usr/local/bin/entrypoint.sh
 
 WORKDIR /data
 # swarm (udp/3000) and blend (udp/3400)

@@ -16,8 +16,15 @@ On first run the container:
 - persists chain state / keystore to a named volume (restart-safe);
 - once the chain is Online, enables PoW mining + auto-claim via the node API.
 
-Ports: `udp/3000` (swarm) and `udp/3400` (Blend). Testnet is ephemeral — it
-re-genesises on each node release.
+Ports: `udp/3000` (swarm) and `udp/3400` (Blend). Testnet is ephemeral: some
+node releases start a new chain. On each start the entrypoint reads the genesis
+of the chain the node binary joins (`chain-genesis.sh`) and compares it with the
+genesis the volume was created on (`/data/.chain-genesis`). A release on the same
+chain keeps config, keys and chain data. A new genesis moves them to
+`/data/oldchain-<previous genesis>/` and starts fresh. A config the new node
+release can't parse (0.3.2 and later reject 0.3.1's) is kept as
+`user_config.yaml.<time>.bak` and regenerated with the same keystore. Upgrade
+paths are tested by `tests/entrypoint-upgrade.sh <image>`.
 
 ### Setup wizard
 
