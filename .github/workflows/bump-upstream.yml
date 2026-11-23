@@ -2,22 +2,32 @@
 #
 # `dappnodesdk github-action bump-upstream` reads manifest.upstream[]
 # (repo=logos-blockchain/logos-blockchain, arg=NODE_VERSION), fetches the
-# latest GitHub release of that repo, and if it is newer than the pinned
+# newest GitHub release of that repo, and if it is newer than the pinned
 # version it opens a PR that:
 #   - updates manifest.upstream[].version + upstreamVersion, and
 #   - rewrites the NODE_VERSION build arg in docker-compose.yml.
 # The build.yml workflow then validates that PR.
 #
-# Secrets / tokens:
-#   - GITHUB_TOKEN  — provided automatically by Actions; needs contents:write
-#                     and pull-requests:write (granted via `permissions` below)
-#                     so the action can push the branch and open the PR.
-#   - eth provider  — uses the public "remote" provider (no key); the APM
-#                     next-version lookup is best-effort and only fully resolves
-#                     once logos-blockchain-node.public.dappnode.eth is registered on APM.
-#   --skip_build    — we only open the bump PR here; build.yml builds it. Drop
-#                     this flag (and add an IPFS provider + Pinata/IPFS secrets)
-#                     if you later want the workflow to also publish a release.
+# Two SDK behaviours can leave the package behind with a green run, so this
+# workflow guards against both:
+#   - If the bump branch already exists, the SDK assumes the PR was opened and
+#     skips that release. A branch whose PR creation was refused would block it
+#     for good, so bump branches that never got a PR are deleted first and the
+#     SDK tries again.
+#   - The SDK only looks at the newest release and skips it when it is a
+#     pre-release, so a newer stable release can go unnoticed. The last step
+#     fails the run when the package is behind the latest stable release and no
+#     bump PR for that release is open in this repository.
+#
+# Tokens:
+#   - BUMP_UPSTREAM_TOKEN (optional secret: a fine-grained PAT for this
+#     repository only, contents and pull-requests write). PRs opened with
+#     GITHUB_TOKEN do not trigger build.yml, so set it to get CI on bump PRs.
+#   - Without it the job uses GITHUB_TOKEN, which needs "Allow GitHub Actions to
+#     create and approve pull requests" in the repository settings.
+#   - eth provider: the public "remote" provider (no key) for the APM version
+#     lookup, which only fully resolves once the package is registered on APM.
+#   --skip_build: we only open the bump PR here; build.yml builds it.
 name: Bump upstream
 
 on:
@@ -29,12 +39,23 @@ permissions:
   contents: write
   pull-requests: write
 
+# A manual run overlapping the scheduled one could delete a branch the other
+# just pushed, before its PR exists.
+concurrency:
+  group: bump-upstream
+  cancel-in-progress: false
+
+env:
+  # The SDK's bump branch prefix (branchNameRoot in @dappnode/dappnodesdk);
+  # branches are named <prefix><repo>@<version>[,<repo>@<version>...].
+  BUMP_PREFIX: dappnodebot/bump-upstream/
+
 jobs:
   bump-upstream:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
+      # Installed before checkout, so npm install scripts never run next to the
+      # token checkout persists in .git/config.
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -42,7 +63,60 @@ jobs:
       - name: Install DAppNode SDK
         run: npm i -g @dappnode/dappnodesdk
 
+      # The SDK pushes the bump branch with the checkout's credentials.
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.BUMP_UPSTREAM_TOKEN || github.token }}
+
+      - name: Delete bump branches that never got a PR
+        env:
+          GH_TOKEN: ${{ secrets.BUMP_UPSTREAM_TOKEN || github.token }}
+        run: |
+          set -euo pipefail
+          # ls-remote matches patterns against the end of a ref, so filter on
+          # the full ref to keep branches that merely end in the prefix.
+          git ls-remote --heads origin "refs/heads/${BUMP_PREFIX}*" \
+            | awk '{print $2}' | { grep "^refs/heads/${BUMP_PREFIX}" || true; } | sed 's|^refs/heads/||' |
+          while read -r branch; do
+            prs="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$branch" --state all --json number --jq length)"
+            if [ "$prs" = 0 ]; then
+              echo "::warning::$branch has no PR; deleting it so the SDK opens one"
+              git push origin --delete "$branch"
+            fi
+          done
+
       - name: Check upstream + open bump PR
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.BUMP_UPSTREAM_TOKEN || github.token }}
         run: dappnodesdk github-action bump-upstream --skip_build
+
+      - name: Fail if behind the latest stable release with no bump PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          # The manifest as checked out, not as the SDK may have edited it.
+          upstream="$(git show "$GITHUB_SHA:dappnode_package.json" \
+            | jq -r '.upstream[] | "\(.repo) \(.version)"')"
+          # Bump PRs from this repository into the default branch only.
+          heads="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --base "$DEFAULT_BRANCH" \
+            --limit 1000 --json headRefName,isCrossRepository \
+            --jq '.[] | select(.isCrossRepository | not) | .headRefName')"
+          behind=0
+          while read -r repo pinned; do
+            latest="$(gh api "repos/$repo/releases/latest" --jq .tag_name)"
+            newest="$(printf '%s\n%s\n' "${pinned#v}" "${latest#v}" | sort -V | tail -n 1)"
+            if [ "${latest#v}" = "${pinned#v}" ] || [ "$newest" = "${pinned#v}" ]; then
+              echo "up to date: $repo $pinned (latest stable $latest)"
+              continue
+            fi
+            if printf '%s\n' "$heads" | { grep "^${BUMP_PREFIX}" || true; } | sed "s|^${BUMP_PREFIX}||" \
+              | tr ',' '\n' | grep -qxF "$repo@$latest"; then
+              echo "$repo $latest is out (pinned $pinned); its bump PR is open"
+              continue
+            fi
+            echo "::error::$repo $latest is the latest stable release, the package pins $pinned, and no bump PR for it is open"
+            behind=1
+          done <<< "$upstream"
+          exit "$behind"
