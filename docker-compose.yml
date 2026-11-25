@@ -9,13 +9,18 @@ services:
       # NODE_VERSION is the upstream release tag; the bump-upstream CI edits it
       # in place when logos-blockchain/logos-blockchain cuts a new release.
       args:
-        NODE_VERSION: 0.3.4
+        NODE_VERSION: 0.3.6
     image: "node.logos-blockchain-node.public.dappnode.eth:0.2.0"
     restart: unless-stopped
     environment:
       - MINING_ENABLED=true
       - MINING_MAX_THREADS=1
       - LOG_LEVEL=info
+      # Node 0.3.6 settings, read at start (they override the config): listen on the
+      # package network, and answer requests addressed to `node`, the name monitoring
+      # and webui use. Without it the node refuses them (403, logos-blockchain#3996).
+      - HTTP_HOST=0.0.0.0:8080
+      - HTTP_ALLOWED_HOST=node
     volumes:
       - "data:/data"
     ports:
