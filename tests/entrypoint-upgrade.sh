@@ -156,6 +156,18 @@ check "an interrupted migration finishes on restart" migration_finished
 seed .chain-version 0.3.1; echo "old-format" >> "$VOL/user_config.yaml"; run "$GENESIS_031"
 check "a config the node rejects is regenerated, keystore and data kept" config_regenerated
 
+# Minimal configs (0.3.4 and later) carry no max_threads: the wizard's value is added.
+# A config that has one gets it replaced.
+threads_added() { grep -q '^pow:' "$VOL/user_config.yaml" && grep -q '^    max_threads: 1$' "$VOL/user_config.yaml" && kept; }
+seed .chain-genesis "$GENESIS_031"; run "$GENESIS_031"
+check "a minimal config gets pow.mining.max_threads from the wizard" threads_added
+threads_replaced() { grep -q '^  max_threads: 1$' "$VOL/user_config.yaml" && ! grep -q 'max_threads: 4' "$VOL/user_config.yaml"; }
+seed .chain-genesis "$GENESIS_031"; printf 'pow:\n  max_threads: 4\n' >> "$VOL/user_config.yaml"; run "$GENESIS_031"
+check "an existing max_threads is set to the wizard's value" threads_replaced
+threads_once() { [ "$(grep -c max_threads "$VOL/user_config.yaml")" = 1 ]; }
+seed .chain-genesis "$GENESIS_031"; run "$GENESIS_031"; run "$GENESIS_031"
+check "a restart doesn't add max_threads twice" threads_once
+
 # The probe fails or prints garbage: nothing is moved, markers stay as they were.
 seed .chain-version 0.3.1; run fail
 check "a failed genesis probe leaves keys, data and markers alone" untouched_relaunch_volume

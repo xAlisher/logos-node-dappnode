@@ -94,11 +94,19 @@ if [ ! -f "$CFG" ]; then
 fi
 
 # Apply wizard settings every start (idempotent) so updates take effect:
-#  - cap mining threads to the configured value (default 1, host-friendly)
-sed -i "s/^\([[:space:]]*\)max_threads:.*/\1max_threads: ${MINING_MAX_THREADS}/" "$CFG"
-#  - expose the API on the container network so it is monitorable over the DAppNode net / VPN
+#  - cap mining threads to the configured value (default 1, host-friendly). Configs are
+#    minimal since 0.3.4 (only changed settings), so add the setting when it's missing.
+if grep -q '^[[:space:]]*max_threads:' "$CFG"; then
+  sed -i "s/^\([[:space:]]*\)max_threads:.*/\1max_threads: ${MINING_MAX_THREADS}/" "$CFG"
+elif ! grep -q '^pow:' "$CFG"; then
+  printf 'pow:\n  mining:\n    max_threads: %s\n' "${MINING_MAX_THREADS}" >> "$CFG"
+else
+  echo "[logos-node] config has a pow section without max_threads; leaving mining threads at the node default" >&2
+fi
+#  - the API's address and allowed host names come from HTTP_HOST / HTTP_ALLOWED_HOST
+#    (docker-compose). An older full config still names 127.0.0.1; open it too.
 sed -i 's|listen_address: 127.0.0.1:8080|listen_address: 0.0.0.0:8080|' "$CFG"
-echo "[logos-node] mining max_threads=${MINING_MAX_THREADS}, API on 0.0.0.0:8080, log=${LOG_LEVEL}"
+echo "[logos-node] mining max_threads=${MINING_MAX_THREADS}, API ${HTTP_HOST:-from config} (hosts: ${HTTP_ALLOWED_HOST:-ip/localhost}), log=${LOG_LEVEL}"
 
 # Once Online, enable PoW mining + auto-claim — unless the wizard disabled mining.
 if [ "${MINING_ENABLED}" = "true" ]; then
