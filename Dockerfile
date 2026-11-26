@@ -4,7 +4,7 @@ FROM debian:stable-slim
 # auto-populates it per --platform, and a literal default (=amd64) would SHADOW that
 # auto-value, silently baking the x86_64 binary into the arm64 image. For plain
 # (non-buildx) builds where it's empty, we fall back to amd64 in the RUN below.
-ARG NODE_VERSION=0.3.6
+ARG NODE_VERSION=0.3.7
 ARG TARGETARCH
 
 RUN apt-get update \
